@@ -4,12 +4,35 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\ArticleRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use App\Controller\ArticleUpdatedAt;
 
 /**
  * @ORM\Entity(repositoryClass=ArticleRepository::class)
- * @ApiResource()
+ * @ApiResource(
+ *     collectionOperations={
+ *          "get"={
+ *              "normalization_context"={"groups"={"article_read"}}
+ *          },
+ *          "post"
+ *     },
+ *     itemOperations={
+ *          "get"={
+ *              "normalization_context"={"groups"={"article_details_read"}}
+ *          },
+ *          "put",
+ *          "patch",
+ *          "delete",
+ *          "put_updated_at"={
+ *              "method"="PUT",
+ *              "path"="/aticles/{id}/updated-at",
+ *              "controller"=ArticleUpdatedAt::class,
+ *     }
+ *     }
+ * )
  */
 class Article
 {
@@ -17,16 +40,19 @@ class Article
     use Timestampable;
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"article_read","user_details_read","article_details_read"})
      */
     private string $name;
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"article_read","user_details_read","article_details_read"})
      */
     private string $content;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="articles")
+     * @Groups({"article_details_read"})
      */
     private User $author;
 
